@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Birthday invite</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="wrap">
+  <header class="hero">
+    <div class="e">🎉</div>
+    <h1 id="title">You’re invited!</h1>
+    <p><strong id="when"></strong></p>
+    <p id="where"></p>
+    <p class="msg2" id="message"></p>
+    <div class="count" id="count"></div>
+  </header>
+
+  <section class="card" id="guests" hidden>
+    <h2>Who’s coming</h2>
+    <div class="stats">
+      <div class="yes"><b id="cy">0</b><span>Going</span></div>
+      <div class="maybe"><b id="cm">0</b><span>Maybe</span></div>
+      <div class="no"><b id="cn">0</b><span>Can’t make it</span></div>
+    </div>
+    <div id="list" style="margin-top:12px"></div>
+  </section>
+
+  <form class="card" id="f" novalidate>
+    <h2>RSVP</h2>
+    <p class="msg" id="rsvpBy" style="margin-top:-6px"></p>
+    <label for="name">Your Name</label>
+    <input id="name" maxlength="60" autocomplete="name" placeholder="Your name">
+    <label>Will you be there?</label>
+    <div class="opts" role="group" aria-label="Your answer">
+      <button type="button" class="opt" data-v="yes" aria-pressed="false">✅ Yes</button>
+      <button type="button" class="opt" data-v="maybe" aria-pressed="false">🤔 Maybe</button>
+      <button type="button" class="opt" data-v="no" aria-pressed="false">❌ No</button>
+    </div>
+    <div id="plusWrap"><label for="plus">Extra guests you’re bringing</label><input id="plus" type="number" min="0" max="10" value="0"></div>
+    <label for="note">Note (dietary needs, a message…)</label>
+    <textarea id="note" rows="2" maxlength="200"></textarea>
+    <button class="btn" id="send" disabled>Send RSVP</button>
+    <p class="msg" id="status" role="status"></p>
+  </form>
+</div>
+<script>
+const $=id=>document.getElementById(id);let choice=null,ev=null;
+const L={yes:'Going',maybe:'Maybe',no:"Can't make it"};
+function mk(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+async function loadEvent(){
+  ev=await (await fetch('/api/event')).json();
+  const t=`${ev.host}’s ${ev.age?ev.age+'th ':''}${ev.title}`;
+  document.title=t;$('title').textContent='You’re invited to '+t+'!';
+  const d=new Date(ev.date);
+  $('when').textContent=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'})+' · '+d.toLocaleTimeString(undefined,{hour:'numeric',minute:'2-digit'});
+  $('where').textContent=[ev.venue,ev.address].filter(Boolean).join(', ');
+  $('message').textContent=ev.message||'';
+  if(ev.rsvpBy)$('rsvpBy').textContent='Please reply by '+new Date(ev.rsvpBy+'T12:00:00').toLocaleDateString(undefined,{month:'long',day:'numeric'})+'.';
+  $('guests').hidden=!ev.showGuestList;tick();setInterval(tick,30000);
+}
+function tick(){
+  const ms=new Date(ev.date)-Date.now(),box=$('count');box.replaceChildren();
+  if(ms<=0){box.append(mk('div','',"It’s party time! 🎂"));return}
+  const m=Math.floor(ms/60000);
+  [[Math.floor(m/1440),'days'],[Math.floor(m%1440/60),'hours'],[m%60,'min']].forEach(([n,l])=>{const d=mk('div');d.append(mk('b','',n),mk('span','',l));box.append(d)});
+}
+async function loadGuests(){
+  if(!ev.showGuestList)return;
+  const g=await (await fetch('/api/guests')).json();
+  const c={yes:0,maybe:0,no:0};g.forEach(x=>c[x.status]+=x.status==='yes'?1+x.plus:1);
+  $('cy').textContent=c.yes;$('cm').textContent=c.maybe;$('cn').textContent=c.no;
+  const o={yes:0,maybe:1,no:2};g.sort((a,b)=>o[a.status]-o[b.status]||a.name.localeCompare(b.name));
+  $('list').replaceChildren(...(g.length?g.map(x=>{const r=mk('div','row'),n=mk('div');n.append(mk('strong','',x.name+(x.plus?` +${x.plus}`:'')));
+    r.append(n,mk('span','tag '+x.status,L[x.status]));return r}):[mk('p','msg','No RSVPs yet. Be the first!')]));
+}
+function check(){$('send').disabled=!(choice&&$('name').value.trim());$('plusWrap').hidden=choice!=='yes'}
+document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{choice=b.dataset.v;document.querySelectorAll('.opt').forEach(x=>x.setAttribute('aria-pressed',x===b));check()});
+$('name').oninput=check;
+$('f').onsubmit=async e=>{e.preventDefault();$('send').disabled=true;$('status').className='msg';$('status').textContent='Sending…';
+  try{const r=await fetch('/api/rsvp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:$('name').value,status:choice,plus:$('plus').value,note:$('note').value})});
+    const j=await r.json();if(!r.ok)throw new Error(j.error);
+    $('status').textContent=j.updated?'RSVP updated. See you there! 🎈':'RSVP sent. Thank you! 🎈';loadGuests();
+  }catch(err){$('status').className='msg err';$('status').textContent=err.message||'Could not send. Check your connection and try again.'}
+  check()};
+check();loadEvent().then(loadGuests);
+</script></body></html>

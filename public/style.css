@@ -1,0 +1,247 @@
+:root {
+  --bg: #fff7ef;
+  --card: #ffffff;
+  --ink: #2b2140;
+  --muted: #6f6585;
+  --accent: #e8486b;
+  --accent2: #ff9f4a;
+  --line: #eadfd3;
+  --yes: #1f9d6b;
+  --maybe: #d99100;
+  --no: #8a8498;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1a1426;
+    --card: #251d36;
+    --ink: #f6efff;
+    --muted: #b3a8c8;
+    --line: #3a2f52;
+    --yes: #47d19b;
+    --maybe: #f2b64a;
+    --no: #a39db3;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
+.hero {
+  text-align: center;
+  padding: 36px 20px;
+  border-radius: 24px;
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--accent2));
+  box-shadow: 0 12px 30px rgba(232, 72, 107, 0.28);
+}
+.hero .e {
+  font-size: 54px;
+  display: inline-block;
+  animation: pop 0.8s ease-out both;
+}
+.hero h1 {
+  margin: 8px 0 6px;
+  font-size: 30px;
+  line-height: 1.15;
+}
+.hero p {
+  margin: 3px 0;
+  opacity: 0.96;
+}
+.hero .msg2 {
+  margin-top: 10px;
+}
+.count {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+.count div {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 16px;
+  padding: 8px 14px;
+  min-width: 78px;
+}
+.count b {
+  display: block;
+  font-size: 26px;
+  line-height: 1.2;
+}
+.count span {
+  font-size: 12px;
+  opacity: 0.95;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px;
+  margin-top: 16px;
+  box-shadow: 0 4px 14px rgba(43, 33, 64, 0.06);
+}
+h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+label {
+  display: block;
+  font-size: 14px;
+  color: var(--muted);
+  margin: 12px 0 4px;
+}
+input, textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+input:focus,
+textarea:focus,
+button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  outline-offset: 1px;
+}
+.opts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.opt {
+  padding: 12px 6px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  text-align: center;
+}
+.opt[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--bg));
+  font-weight: 600;
+}
+.btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(232, 72, 107, 0.3);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  box-shadow: none;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  text-align: center;
+}
+.stats b {
+  display: block;
+  font-size: 28px;
+}
+.stats span {
+  font-size: 13px;
+  color: var(--muted);
+}
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.row:first-child {
+  border-top: 0;
+}
+.tag {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 99px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+.yes {
+  color: var(--yes);
+}
+.maybe {
+  color: var(--maybe);
+}
+.no {
+  color: var(--no);
+}
+.msg {
+  font-size: 14px;
+  color: var(--muted);
+  margin-top: 8px;
+  min-height: 20px;
+}
+.msg.err {
+  color: #d6204f;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+th,
+td {
+  text-align: left;
+  padding: 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.small {
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+}
+@keyframes pop {
+  from {
+    transform: scale(0.3) rotate(-20deg);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero .e {
+    animation: none;
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "birthday-invite",
+  "version": "1.0.0",
+  "description": "Birthday invite with RSVP page, guest list and host dashboard. No dependencies.",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

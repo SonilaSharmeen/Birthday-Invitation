@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Host dashboard</title><link rel="stylesheet" href="style.css"></head>
+<body><div class="wrap"><main class="card">
+<h2>🎂 Host dashboard</h2>
+<form id="login"><label for="pin">Host PIN (from config.json)</label><input id="pin" type="password" autocomplete="current-password"><button class="btn">Open dashboard</button><p class="msg" id="err" role="alert"></p></form>
+<div id="dash" hidden>
+  <div class="stats"><div class="yes"><b id="cy">0</b><span>Going</span></div><div class="maybe"><b id="cm">0</b><span>Maybe</span></div><div class="no"><b id="cn">0</b><span>Can't make it</span></div></div>
+  <p><button class="small" id="csv">Download CSV</button> <button class="small" id="out">Lock</button></p>
+  <div style="overflow-x:auto"><table><thead><tr><th>Name</th><th>Answer</th><th>Extra</th><th>Note</th><th></th></tr></thead><tbody id="rows"></tbody></table></div>
+</div></main></div>
+<script>
+const $=id=>document.getElementById(id);const L={yes:'Going',maybe:'Maybe',no:"Can't make it"};let pin=sessionStorage.getItem('pin')||'',data=[];
+const H=()=>({'x-admin-pin':pin});
+async function load(){const r=await fetch('/api/admin/rsvps',{headers:H()});if(!r.ok){sessionStorage.removeItem('pin');$('login').hidden=false;$('dash').hidden=true;if(pin)$('err').textContent='Wrong PIN.';return}
+  data=await r.json();$('login').hidden=true;$('dash').hidden=false;render()}
+function cell(t,x){const c=document.createElement(t);c.textContent=x;return c}
+function render(){const c={yes:0,maybe:0,no:0};data.forEach(x=>c[x.status]+=x.status==='yes'?1+x.plus:1);
+  $('cy').textContent=c.yes;$('cm').textContent=c.maybe;$('cn').textContent=c.no;
+  $('rows').replaceChildren(...data.map(x=>{const tr=document.createElement('tr');tr.append(cell('td',x.name),cell('td',L[x.status]),cell('td',x.plus||''),cell('td',x.note||''));
+    const td=document.createElement('td'),b=cell('button','Remove');b.className='small';b.onclick=async()=>{if(confirm('Remove '+x.name+'?')){await fetch('/api/admin/rsvps?id='+encodeURIComponent(x.id),{method:'DELETE',headers:H()});load()}};td.append(b);tr.append(td);return tr}))}
+$('login').onsubmit=e=>{e.preventDefault();pin=$('pin').value;sessionStorage.setItem('pin',pin);load()};
+$('out').onclick=()=>{sessionStorage.removeItem('pin');pin='';location.reload()};
+$('csv').onclick=()=>{const q=s=>'"'+String(s).replace(/"/g,'""')+'"';
+  const t=['Name,Answer,Extra guests,Note,Time',...data.map(x=>[x.name,L[x.status],x.plus,x.note,x.at].map(q).join(','))].join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([t],{type:'text/csv'}));a.download='rsvps.csv';a.click()};
+if(pin)load();
+</script></body></html>
